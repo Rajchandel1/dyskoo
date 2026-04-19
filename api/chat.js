@@ -8,7 +8,17 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Debug: Log if API key is present
+    if (!process.env.GROQ_API_KEY) {
+      console.error('ERROR: GROQ_API_KEY environment variable is not set!');
+      return res.status(500).json({ 
+        error: 'API key not configured',
+        choices: [{ message: { content: "Configuration error. Please contact support. 🛠️" } }]
+      });
+    }
+    
     const { messages } = req.body;
+    console.log('Received messages:', messages.length);
 
     const systemMessage = {
       role: "system",
@@ -30,14 +40,17 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Groq API error:', response.status, errorText);
       throw new Error(`Groq API error: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('Groq API success');
     res.status(200).json(data);
     
   } catch (error) {
-    console.error('Chat API Error:', error);
+    console.error('Chat API Error:', error.message);
     res.status(500).json({ 
       error: 'Failed to get response',
       choices: [{ message: { content: "Oops! I'm having trouble thinking right now. Try again soon! 🦁" } }]
