@@ -1,4 +1,12 @@
 {
   "version": 2,
-  "name": "dysko"
+  "name": "dysko",
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
 }
