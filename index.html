@@ -441,6 +441,106 @@
       </div>
     </div>
 
+    <!-- Achievements Modal -->
+    <div id="achievements-modal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 hidden" onclick="if(event.target===this)closeAchievements()">
+      <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-display text-xl text-brown"><i class="fa-solid fa-trophy text-primary mr-2"></i>Achievements</h2>
+          <button onclick="closeAchievements()" class="w-8 h-8 rounded-full bg-peach flex items-center justify-center text-brown">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="achievements-list" class="space-y-3">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 hidden" onclick="if(event.target===this)closeSettings()">
+      <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-display text-xl text-brown"><i class="fa-solid fa-gear text-secondary mr-2"></i>Settings</h2>
+          <button onclick="closeSettings()" class="w-8 h-8 rounded-full bg-peach flex items-center justify-center text-brown">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="space-y-4">
+          <!-- Sound Effects -->
+          <div class="flex items-center justify-between p-4 bg-cream rounded-2xl">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                <i class="fa-solid fa-volume-high"></i>
+              </div>
+              <div>
+                <p class="font-bold text-brown text-sm">Sound Effects</p>
+                <p class="text-xs text-muted">Play sounds on actions</p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="setting-sound" class="sr-only peer" checked onchange="toggleSetting('sound')">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          
+          <!-- Text to Speech -->
+          <div class="flex items-center justify-between p-4 bg-cream rounded-2xl">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center text-secondary">
+                <i class="fa-solid fa-headphones"></i>
+              </div>
+              <div>
+                <p class="font-bold text-brown text-sm">Text to Speech</p>
+                <p class="text-xs text-muted">Read questions aloud</p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="setting-tts" class="sr-only peer" checked onchange="toggleSetting('tts')">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+            </label>
+          </div>
+          
+          <!-- Animations -->
+          <div class="flex items-center justify-between p-4 bg-cream rounded-2xl">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <div>
+                <p class="font-bold text-brown text-sm">Animations</p>
+                <p class="text-xs text-muted">Fun visual effects</p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="setting-animations" class="sr-only peer" checked onchange="toggleSetting('animations')">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+            </label>
+          </div>
+          
+          <!-- High Contrast -->
+          <div class="flex items-center justify-between p-4 bg-cream rounded-2xl">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-pink/20 flex items-center justify-center text-pink">
+                <i class="fa-solid fa-eye"></i>
+              </div>
+              <div>
+                <p class="font-bold text-brown text-sm">High Contrast</p>
+                <p class="text-xs text-muted">Easier to read text</p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="setting-contrast" class="sr-only peer" onchange="toggleSetting('contrast')">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink"></div>
+            </label>
+          </div>
+        </div>
+        
+        <button onclick="saveSettings()" class="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-secondary to-mint text-white font-extrabold shadow-lg hover:shadow-xl transition-all">
+          Save Settings <i class="fa-solid fa-check ml-2"></i>
+        </button>
+      </div>
+    </div>
+
     <!-- ===== PARENT REPORT ===== -->
     <div id="screen-parent-report" class="screen relative z-10"  style="background-image: url('https://img.freepik.com/free-psd/cute-animals-frame-element-design_23-2150385522.jpg?t=st=1776545478~exp=1776549078~hmac=ccd3d940f2c23b931773768365a9d9f89f3556f6c33056af3d764acea0b72525&w=740'); background-size: cover; background-position: center;">
       <div class="sticky top-0 z-20 bg-white/90 backdrop-blur-md px-4 pt-4 pb-3 border-b border-peach flex items-center">

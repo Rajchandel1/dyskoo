@@ -427,12 +427,108 @@
         showToast("Profile updated!", "success");
       }
 
+      // ============================================================
+      // ACHIEVEMENTS SYSTEM
+      // ============================================================
+      const ACHIEVEMENTS = [
+        { id: "first_steps", name: "First Steps", desc: "Complete your first lesson", icon: "fa-shoe-prints", color: "#FF6B35", condition: () => Object.keys(S.chapterProgress).length >= 1 },
+        { id: "rising_star", name: "Rising Star", desc: "Earn 50 stars", icon: "fa-star", color: "#FFD166", condition: () => S.totalStars >= 50 },
+        { id: "super_star", name: "Super Star", desc: "Earn 100 stars", icon: "fa-star", color: "#FFD166", condition: () => S.totalStars >= 100 },
+        { id: "champion", name: "Champion", desc: "Earn 200 stars", icon: "fa-trophy", color: "#FF85A1", condition: () => S.totalStars >= 200 },
+        { id: "perfect_score", name: "Perfect Score", desc: "Get 3 stars in any lesson", icon: "fa-circle-check", color: "#2EC4B6", condition: () => Object.values(S.chapterProgress).some(p => p.score === p.total) },
+        { id: "halfway", name: "Halfway There", desc: "Complete 50% of lessons", icon: "fa-battery-half", color: "#43E97B", condition: () => S.allLessons && Object.keys(S.chapterProgress).length >= S.allLessons.chapters.length * 0.5 },
+        { id: "master", name: "Dysko Master", desc: "Complete all lessons", icon: "fa-crown", color: "#A8E6CF", condition: () => S.allLessons && Object.keys(S.chapterProgress).length === S.allLessons.chapters.length },
+        { id: "chatty", name: "Chatty", desc: "Send 10 messages to Dysko", icon: "fa-comments", color: "#4FACFE", condition: () => (S.chatHistory?.length || 0) >= 10 },
+        { id: "assessment_hero", name: "Assessment Hero", desc: "Complete the assessment", icon: "fa-clipboard-check", color: "#FA709A", condition: () => S.lessons !== null }
+      ];
+
       function showAchievements() {
-        showToast("Achievements coming soon!", "info");
+        const list = document.getElementById('achievements-list');
+        const unlocked = JSON.parse(localStorage.getItem('dysko_achievements') || '[]');
+        
+        // Check and unlock new achievements
+        ACHIEVEMENTS.forEach(ach => {
+          if (ach.condition() && !unlocked.includes(ach.id)) {
+            unlocked.push(ach.id);
+          }
+        });
+        localStorage.setItem('dysko_achievements', JSON.stringify(unlocked));
+        
+        // Render
+        list.innerHTML = ACHIEVEMENTS.map(ach => {
+          const isUnlocked = unlocked.includes(ach.id);
+          return `
+            <div class="flex items-center gap-4 p-4 rounded-2xl ${isUnlocked ? 'bg-gradient-to-r from-primary/10 to-accent/10' : 'bg-cream'}">
+              <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl" style="background: ${isUnlocked ? ach.color : '#e5e5e5'}; color: ${isUnlocked ? 'white' : '#9B8A8E'}">
+                <i class="fa-solid ${ach.icon}"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-bold text-brown ${isUnlocked ? '' : 'opacity-50'}">${ach.name}</h3>
+                <p class="text-xs text-muted">${ach.desc}</p>
+              </div>
+              ${isUnlocked ? '<span class="text-2xl">🏆</span>' : '<i class="fa-solid fa-lock text-muted"></i>'}
+            </div>
+          `;
+        }).join('');
+        
+        document.getElementById('achievements-modal').classList.remove('hidden');
+      }
+
+      function closeAchievements() {
+        document.getElementById('achievements-modal').classList.add('hidden');
+      }
+
+      // ============================================================
+      // SETTINGS SYSTEM
+      // ============================================================
+      const DEFAULT_SETTINGS = {
+        sound: true,
+        tts: true,
+        animations: true,
+        contrast: false
+      };
+
+      let currentSettings = { ...DEFAULT_SETTINGS };
+
+      function loadSettings() {
+        const saved = localStorage.getItem('dysko_settings');
+        if (saved) {
+          currentSettings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+        }
+        // Apply settings
+        document.getElementById('setting-sound').checked = currentSettings.sound;
+        document.getElementById('setting-tts').checked = currentSettings.tts;
+        document.getElementById('setting-animations').checked = currentSettings.animations;
+        document.getElementById('setting-contrast').checked = currentSettings.contrast;
+        applySettings();
       }
 
       function showSettings() {
-        showToast("Settings coming soon!", "info");
+        loadSettings();
+        document.getElementById('settings-modal').classList.remove('hidden');
+      }
+
+      function closeSettings() {
+        document.getElementById('settings-modal').classList.add('hidden');
+      }
+
+      function toggleSetting(key) {
+        currentSettings[key] = document.getElementById(`setting-${key}`).checked;
+      }
+
+      function saveSettings() {
+        localStorage.setItem('dysko_settings', JSON.stringify(currentSettings));
+        applySettings();
+        closeSettings();
+        showToast("Settings saved!", "success");
+      }
+
+      function applySettings() {
+        // Apply high contrast
+        document.body.classList.toggle('high-contrast', currentSettings.contrast);
+        
+        // Apply animations
+        document.body.classList.toggle('no-animations', !currentSettings.animations);
       }
 
       function resetProgress() {
@@ -443,6 +539,10 @@
           S.lessons = null;
           S.allLessons = null;
           clearLocalStorage();
+          localStorage.removeItem('dysko_achievements');
+          localStorage.removeItem('dysko_settings');
+          currentSettings = { ...DEFAULT_SETTINGS };
+          applySettings();
           renderProfile();
           renderProgress();
           showToast("Progress reset!", "success");
@@ -643,6 +743,9 @@
       // ============================================================
       // INIT
       // ============================================================
+      // Load settings first
+      loadSettings();
+
       // Load saved data from localStorage
       const hasSavedData = loadFromLocalStorage();
       if (hasSavedData && S.lessons) {
