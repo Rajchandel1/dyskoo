@@ -11,6 +11,55 @@
       };
 
       // ============================================================
+      // LOCALSTORAGE PERSISTENCE
+      // ============================================================
+      function saveToLocalStorage() {
+        const data = {
+          userName: S.userName,
+          userAge: S.userAge,
+          assessAnswers: S.assessAnswers,
+          weaknesses: S.weaknesses,
+          lessons: S.lessons,
+          allLessons: S.allLessons,
+          chapterProgress: S.chapterProgress,
+          totalStars: S.totalStars,
+          dyslexiaProfile: S.dyslexiaProfile,
+          chatHistory: S.chatHistory
+        };
+        localStorage.setItem('dysko_data', JSON.stringify(data));
+        console.log('Saved to localStorage');
+      }
+
+      function loadFromLocalStorage() {
+        try {
+          const saved = localStorage.getItem('dysko_data');
+          if (saved) {
+            const data = JSON.parse(saved);
+            S.userName = data.userName || "";
+            S.userAge = data.userAge || 7;
+            S.assessAnswers = data.assessAnswers || [];
+            S.weaknesses = data.weaknesses || [];
+            S.lessons = data.lessons || null;
+            S.allLessons = data.allLessons || null;
+            S.chapterProgress = data.chapterProgress || {};
+            S.totalStars = data.totalStars || 0;
+            S.dyslexiaProfile = data.dyslexiaProfile || null;
+            S.chatHistory = data.chatHistory || [];
+            console.log('Loaded from localStorage');
+            return true;
+          }
+        } catch (e) {
+          console.error('Error loading from localStorage:', e);
+        }
+        return false;
+      }
+
+      function clearLocalStorage() {
+        localStorage.removeItem('dysko_data');
+        console.log('Cleared localStorage');
+      }
+
+      // ============================================================
       // ASSESSMENT QUESTIONS
       // ============================================================
       const AQ = [
@@ -172,6 +221,7 @@
         setTimeout(() => {
             S.lessons = buildFallbackLessons(S.weaknesses); // Personalized
             S.allLessons = buildFallbackLessons([], true); // All content
+            saveToLocalStorage();
             renderDashboard();
             showScreen("dashboard");
             createConfetti();
@@ -370,6 +420,7 @@
         }
         
         S.userName = newName;
+        saveToLocalStorage();
         renderProfile();
         renderDashboard();
         closeEditProfile();
@@ -391,6 +442,7 @@
           S.streak = 0;
           S.lessons = null;
           S.allLessons = null;
+          clearLocalStorage();
           renderProfile();
           renderProgress();
           showToast("Progress reset!", "success");
@@ -576,6 +628,7 @@
         document.getElementById("ex-stars-earned").innerHTML = Array.from({ length: 3 }, (_, i) => `<span class="text-4xl ${i < stars ? "star-collect" : "opacity-20"}" style="animation-delay:${i * 0.2}s">⭐</span>`).join("");
         document.getElementById("ex-next-btn-text").textContent = S.currentChapter < S.currentSource.chapters.length - 1 ? "Next Chapter" : "Back to Home";
         if (stars >= 2) { createConfetti(); playSound("complete"); } else playSound("correct");
+        saveToLocalStorage();
       }
 
       function nextChapterOrDash() {
@@ -590,6 +643,16 @@
       // ============================================================
       // INIT
       // ============================================================
+      // Load saved data from localStorage
+      const hasSavedData = loadFromLocalStorage();
+      if (hasSavedData && S.lessons) {
+        // Auto-redirect to dashboard if user has completed assessment
+        S.currentScreen = "dashboard";
+        renderDashboard();
+        renderAllLessons();
+        showScreen("dashboard");
+      }
+
       document.getElementById("input-name").addEventListener("keydown", (e) => {
         if (e.key === "Enter") startAssessment();
       });
